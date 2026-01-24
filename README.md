@@ -1,4 +1,9 @@
 这份手册涵盖了你安装的三个工具，旨在让你以最快速度完成配置并投入使用。
+brew install --cask font-fira-code-nerd-font
+
+brew install starship
+
+brew install eza
 
 ### 1. 终端初始化 (Shell Configuration)
 
