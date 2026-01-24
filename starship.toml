@@ -1,0 +1,90 @@
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# --- 迷雾蓝精简版 (CPU归一化 + 内存 + 电池) ---
+
+format = """
+[░▒▓](#b8c0e0)\
+${custom.cpu_global}\
+$memory_usage\
+$battery\
+[](fg:#b8c0e0 bg:#ccd4f0)\
+$git_branch\
+$git_status\
+[](fg:#ccd4f0 bg:#e1e6f5)\
+$directory\
+[](fg:#e1e6f5 bg:#eff1f5)\
+$time\
+[ ](fg:#eff1f5)\
+\n$character"""
+
+# --- 1. CPU 全局使用率 (归一化到 0-100%) ---
+# 原理: ps计算总和 / sysctl获取的核心数
+[custom.cpu_global]
+disabled = false
+# 这里的命令：
+# 1. cores=$(sysctl -n hw.logicalcpu) 获取核心数(Mac专用)
+# 2. awk '{s+=$1} END {printf "%.0f%%", s/cores}' 计算总和并除以核心数
+command = """
+ps -A -o %cpu | awk -v cores=$(sysctl -n hw.logicalcpu) '{s+=$1} END {printf "%.0f%%", s/cores}'
+"""
+when = "true"
+symbol = " "
+style = "bg:#b8c0e0 fg:#303446"
+format = '[ $symbol$output ]($style)'
+
+# --- 2. 内存监控 ---
+[memory_usage]
+disabled = false
+threshold = -1
+symbol = " "
+style = "bg:#b8c0e0 fg:#303446"
+format = '[ $symbol${ram_pct} ]($style)'
+
+# --- 3. 电池监控 ---
+[battery]
+disabled = false
+full_symbol = " "
+charging_symbol = " "
+discharging_symbol = " "
+unknown_symbol = " "
+empty_symbol = " "
+format = '[ $symbol$percentage ]($style)'
+
+[[battery.display]]
+threshold = 100
+style = "bg:#b8c0e0 fg:#303446"
+
+# --- 4. Git 分支 ---
+[git_branch]
+symbol = ""
+style = "bg:#ccd4f0"
+format = '[[ $symbol $branch ](fg:#2865d4 bg:#ccd4f0)]($style)'
+
+[git_status]
+style = "bg:#ccd4f0"
+format = '[[($all_status$ahead_behind )](fg:#d14d4d bg:#ccd4f0)]($style)'
+
+# --- 5. 路径 ---
+[directory]
+style = "fg:#303446 bg:#e1e6f5" 
+format = "[ $path ]($style)"
+truncation_length = 3
+truncation_symbol = "…/"
+
+[directory.substitutions]
+"Documents" = "󰈙 "
+"Downloads" = " "
+"Music" = " "
+"Pictures" = " "
+
+# --- 6. 时间 ---
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:#eff1f5"
+format = '[[  $time ](fg:#8c92a3 bg:#eff1f5)]($style)'
+
+# --- 7. 提示符 ---
+[character]
+success_symbol = "[➜](bold #3871db)"
+error_symbol = "[✗](bold #d14d4d)"
